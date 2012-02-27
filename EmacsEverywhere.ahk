@@ -328,6 +328,13 @@ fallbackToDefault() {
 ;==========================
 ;Keybindings
 ;==========================
+#IfWinActive ahk_class Emacs 
+{ 
+  Capslock::Ctrl 
+  RCtrl::Capslock 
+} 
+#IfWinActive 
+
 ^x::
   If IsInEmacsMode()
     is_pre_x = 1
