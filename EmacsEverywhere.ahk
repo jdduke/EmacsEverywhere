@@ -2,15 +2,26 @@
 ;ListVars
 ;Pause
 
+
 ;==========================
 ;Initialization
 ;==========================
+
+; Here's a more complex group for MS Outlook 2002.
+; In the autoexecute section at the top of the script:
+ SetTitleMatchMode, 2
+ GroupAdd, VC, Visual Studio ; This is for mails currently being composed
+ GroupAdd, EMACS, ahk_class Emacs
+
+;======================
+
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 #InstallKeybdHook
 #UseHook
+#Persistent
 
 enabledIcon := "EmacsEverywhere_on.ico"
 disabledIcon := "EmacsEverywhere_off.ico"
@@ -18,8 +29,45 @@ disabledIcon := "EmacsEverywhere_off.ico"
 is_pre_x = 0
 ; C-Space status
 is_pre_spc = 0
+
 EmacsModeStat := false
+EmacsModeStatStored := false
+
+ProgWinTitle1 = ahk_class Emacs
+WinTrigger1 = Active
+
+; SetTimer Period
+CheckPeriod = 200
+
 SetEmacsMode(false)
+
+SetTimer, LabelCheckTrigger, %CheckPeriod%
+Return
+
+; ------ ------ ------
+
+LabelCheckTrigger:
+  While ( ProgWinTitle%A_Index% != "" && WinTrigger := WinTrigger%A_Index% )
+    if ( !ProgRunning%A_Index% != !Win%WinTrigger%( ProgWinTitle := ProgWinTitle%A_Index% ) )
+      GoSubSafe( "LabelTriggerO" ( (ProgRunning%A_Index% := !ProgRunning%A_Index%) ? "n" : "ff" ) A_Index )
+Return
+
+; ------ ------ ------
+
+GoSubSafe(mySub)
+{
+  if IsLabel(mySub)
+    GoSub %mySub%
+}
+
+; ------ ------ CUSTOM LABEL SECTION ------ ------
+
+LabelTriggerOn1:
+  SetEmacsMode(false)
+Return
+LabelTriggerOff1:
+  SetEmacsMode(EmacsModeStatStored)
+Return
 
 
 ;==========================
@@ -32,17 +80,18 @@ return
 SetEmacsMode(toActive) {
 	local iconFile := toActive ? enabledIcon : disabledIcon
 	local state := toActive ? "ON" : "OFF"
-	
+
+  EmacsModeStatStored := EmacsModeStat
 	EmacsModeStat := toActive
-	TrayTip, Emacs Everywhere, Emacs mode is %state%, 10, 1
+	;TrayTip, Emacs Everywhere, Emacs mode is %state%, 10, 1
 	Menu, Tray, Icon, %iconFile%,
-	Menu, Tray, Tip, Emacs Everywhere`nEmacs mode is %state%  
-	
+	Menu, Tray, Tip, Emacs Everywhere`nEmacs mode is %state%
+
 	Send {Shift Up}
 }
 
 is_target() {
-	if WinActive("ahk_class Notepad++") {
+	if !WinActive("ahk_class Emacs") {
 		return true
 	} else {
 		return false
@@ -51,11 +100,15 @@ is_target() {
 
 IsInEmacsMode() {
 	global EmacsModeStat
-	if (EmacsModeStat && is_target()) {
+	if (EmacsModeStat  && is_target()) {
 		return true
 	} else {
 		return false
 	}
+}
+
+iSChrome() {
+  return WinActive("ahk_class Chrome_WidgetWin_0")
 }
 
 ;==========================
@@ -73,6 +126,22 @@ delete_backward_char() {
 	Return
 }
 
+delete_word() {
+  ; [Shift]+[del] to delete word (chars up to and including the first space to the right)
+  ;$+Del::Send, {blind}^{Right}{BS}
+  Send ^{Del}
+	global is_pre_spc = 0
+	Return
+}
+
+delete_backward_word() {
+  ; [Shift]+[backspace] to delete word (chars up to the first space to the left)
+  ;$+BS::Send, {blind}^{Left}{BS} ; [ctrl]+[shift]+[left/right] = select chars up to space ('right' includes the space, 'left' doesn't)
+  Send +{BS}
+	global is_pre_spc = 0
+	Return
+}
+
 kill_line() {
 	Send {ShiftDown}{END}{SHIFTUP}
 	Sleep 10 ;[ms]
@@ -81,8 +150,8 @@ kill_line() {
 	;{
 	;	Send ^o
 	;}
-	
-	
+
+
 	global is_pre_spc = 0
 	Return
 }
@@ -210,9 +279,27 @@ next_line() {
 backward_char() {
 	global
 	if is_pre_spc
-		Send +{Left} 
+		Send +{Left}
 	Else
 		Send {Left}
+	Return
+}
+
+backward_word() {
+	global
+	if is_pre_spc
+		Send +^{Left}
+	Else
+		Send ^{Left}
+	Return
+}
+
+forward_word() {
+	global
+	if is_pre_spc
+		Send +^{Right}
+	Else
+		Send ^{Right}
 	Return
 }
 
@@ -280,7 +367,7 @@ h::
 	}
 	Else
 		Send %A_ThisHotkey%
-	Return  
+	Return
 ^d::
 	If IsInEmacsMode()
 		delete_char()
@@ -347,13 +434,13 @@ h::
 		Send %A_ThisHotkey%
 	Return
 ^w::
-	If IsInEmacsMode()
+	If IsInEmacsMode() and !isChrome()
 		kill_region()
 	Else
 		Send %A_ThisHotkey%
 	Return
 !w::
-	If IsInEmacsMode()
+	If IsInEmacsMode() and !Is
 		kill_ring_save()
 	Else
 		Send %A_ThisHotkey%
@@ -370,7 +457,7 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
- 
+
 ;$^{Space}::
 ^vk20sc039::
 	If IsInEmacsMode()
@@ -406,6 +493,30 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
+!f::
+	If IsInEmacsMode()
+		forward_word()
+	Else
+		Send %A_ThisHotkey%
+	Return
+!b::
+	If IsInEmacsMode()
+		backward_word()
+	Else
+		Send %A_ThisHotkey%
+	Return
+!d::
+	If IsInEmacsMode()
+		delete_word()
+	Else
+		Send %A_ThisHotkey%
+	Return
+;!Backspace::
+;	If IsInEmacsMode()
+;		delete_backward_word()
+;	Else
+;		Send %A_ThisHotkey%
+;	Return
 ^p::
 	If IsInEmacsMode()
 		previous_line()
