@@ -35,6 +35,8 @@ EmacsModeStatStored := false
 
 ProgWinTitle1 = ahk_class Emacs
 WinTrigger1 = Active
+ProgWinTitle2 = ahk_group VC
+WinTrigger2 = Active
 
 ; SetTimer Period
 CheckPeriod = 200
@@ -66,6 +68,12 @@ LabelTriggerOn1:
   SetEmacsMode(false)
 Return
 LabelTriggerOff1:
+  SetEmacsMode(EmacsModeStatStored)
+Return
+LabelTriggerOn2:
+  SetEmacsMode(true)
+Return
+LabelTriggerOff2:
   SetEmacsMode(EmacsModeStatStored)
 Return
 
@@ -333,7 +341,7 @@ fallbackToDefault() {
   Capslock::Ctrl 
   RCtrl::Capslock 
 } 
-#IfWinActive 
+#IfWinNotActive ahk_group VC
 
 ^x::
   If IsInEmacsMode()
@@ -524,18 +532,6 @@ h::
 ;	Else
 ;		Send %A_ThisHotkey%
 ;	Return
-^p::
-	If IsInEmacsMode()
-		previous_line()
-	Else
-		Send %A_ThisHotkey%
-	Return
-^n::
-	If IsInEmacsMode()
-		next_line()
-	Else
-		Send %A_ThisHotkey%
-	Return
 ^b::
 	If IsInEmacsMode()
 		backward_char()
@@ -554,9 +550,21 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
-
 #k::
 	MsgBox, 4,, スクリプトを終了しますか?,
 	IfMsgBox, Yes
 		ExitApp
+	Return
+#IfWinActive
+^p::
+	If IsInEmacsMode()
+		previous_line()
+	Else
+		Send %A_ThisHotkey%
+	Return
+^n::
+	If IsInEmacsMode()
+		next_line()
+	Else
+		Send %A_ThisHotkey%
 	Return
