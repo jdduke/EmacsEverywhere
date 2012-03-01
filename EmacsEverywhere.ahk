@@ -10,6 +10,7 @@
 ; Here's a more complex group for MS Outlook 2002.
 ; In the autoexecute section at the top of the script:
  SetTitleMatchMode, 2
+ ;GroupAdd, VC, Visual Studio ; This is for mails currently being composed
  GroupAdd, VC, Visual Studio ; This is for mails currently being composed
  GroupAdd, EMACS, ahk_class Emacs
 
@@ -496,18 +497,7 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
-^a::
-	If IsInEmacsMode()
-		move_beginning_of_line()
-	Else
-		Send %A_ThisHotkey%
-	Return
-^e::
-	If IsInEmacsMode()
-		move_end_of_line()
-	Else
-		Send %A_ThisHotkey%
-	Return
+
 !f::
 	If IsInEmacsMode()
 		forward_word()
@@ -555,7 +545,20 @@ h::
 	IfMsgBox, Yes
 		ExitApp
 	Return
+	^a::
+	If IsInEmacsMode()
+		move_beginning_of_line()
+	Else
+		Send %A_ThisHotkey%
+	Return
+^e::
+	If IsInEmacsMode()
+		move_end_of_line()
+	Else
+		Send %A_ThisHotkey%
+	Return
 #IfWinActive
+
 ^p::
 	If IsInEmacsMode()
 		previous_line()
