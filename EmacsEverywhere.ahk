@@ -11,7 +11,9 @@
 ; In the autoexecute section at the top of the script:
  SetTitleMatchMode, 2
  ;GroupAdd, VC, Visual Studio ; This is for mails currently being composed
- GroupAdd, VC, Visual Studio ; This is for mails currently being composed
+ GroupAdd, VC, Visual Studio ;
+ GroupAdd, VC, Sublime Text ;
+ GroupAdd, VC, Open ;
  GroupAdd, EMACS, ahk_class Emacs
 
 ;======================
