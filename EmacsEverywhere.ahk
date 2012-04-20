@@ -13,6 +13,8 @@
  ;GroupAdd, VC, Visual Studio ; This is for mails currently being composed
  GroupAdd, VC, Visual Studio ;
  GroupAdd, VC, Sublime Text ;
+ GroupAdd, VC, Virtua Writer ;
+ GroupAdd, VC, vwTestGui ;
  GroupAdd, VC, Open ;
  GroupAdd, EMACS, ahk_class Emacs
 
