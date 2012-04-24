@@ -13,8 +13,8 @@
  ;GroupAdd, VC, Visual Studio ; This is for mails currently being composed
  GroupAdd, VC, Visual Studio ;
  GroupAdd, VC, Sublime Text ;
- GroupAdd, VC, Virtua Writer ;
- GroupAdd, VC, vwTestGui ;
+ GroupAdd, Enabled, Virtua Writer ;
+ GroupAdd, Enabled, vwTestGui ;
  GroupAdd, VC, Open ;
  GroupAdd, EMACS, ahk_class Emacs
 
@@ -42,6 +42,8 @@ ProgWinTitle1 = ahk_class Emacs
 WinTrigger1 = Active
 ProgWinTitle2 = ahk_group VC
 WinTrigger2 = Active
+ProgWinTitle3 = ahk_group Enabled
+WinTrigger3 = Active
 
 ; SetTimer Period
 CheckPeriod = 200
@@ -79,6 +81,12 @@ LabelTriggerOn2:
   SetEmacsMode(true)
 Return
 LabelTriggerOff2:
+  SetEmacsMode(EmacsModeStatStored)
+Return
+LabelTriggerOn3:
+  SetEmacsMode(true)
+Return
+LabelTriggerOff3:
   SetEmacsMode(EmacsModeStatStored)
 Return
 
