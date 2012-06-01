@@ -7,10 +7,7 @@
 ;Initialization
 ;==========================
 
-; Here's a more complex group for MS Outlook 2002.
-; In the autoexecute section at the top of the script:
  SetTitleMatchMode, 2
- ;GroupAdd, VC, Visual Studio ; This is for mails currently being composed
  GroupAdd, VC, Visual Studio ;
  GroupAdd, VC, Sublime Text ;
  GroupAdd, Enabled, Virtua Writer ;
@@ -130,6 +127,9 @@ IsInEmacsMode() {
 
 iSChrome() {
   return WinActive("ahk_class Chrome_WidgetWin_0")
+}
+iSVC() {
+  return WinActive("Visual Studio")
 }
 
 ;==========================
@@ -468,7 +468,7 @@ h::
 		Send %A_ThisHotkey%
 	Return
 !w::
-	If IsInEmacsMode() and !Is
+	If IsInEmacsMode()
 		kill_ring_save()
 	Else
 		Send %A_ThisHotkey%
