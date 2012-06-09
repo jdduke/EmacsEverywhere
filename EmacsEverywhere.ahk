@@ -8,10 +8,12 @@
 ;==========================
 
  SetTitleMatchMode, 2
- GroupAdd, VC, Visual Studio ;
+ GroupAdd, VC, VC10;
  GroupAdd, VC, Sublime Text ;
+ GroupAdd, VC, ahk_class wndclass_desked_gsk; 
  GroupAdd, Enabled, Virtua Writer ;
  GroupAdd, Enabled, vwTestGui ;
+ GroupAdd, Enabled, Visual Studio, , , VC, ;
  GroupAdd, VC, Open ;
  GroupAdd, EMACS, ahk_class Emacs
 
@@ -29,6 +31,8 @@ enabledIcon := "EmacsEverywhere_on.ico"
 disabledIcon := "EmacsEverywhere_off.ico"
 ; C-x status
 is_pre_x = 0
+; C-c status
+is_pre_c = 0
 ; C-Space status
 is_pre_spc = 0
 
@@ -91,7 +95,7 @@ Return
 ;==========================
 ;Emacs mode toggle
 ;==========================
-+CapsLock::
++!^Tab::
 	SetEmacsMode(!EmacsModeStat)
 return
 
@@ -372,6 +376,7 @@ h::
     fallbackToDefault()
   Return
 
+
 ^f::
   If IsInEmacsMode() {
     If is_pre_x {
@@ -387,15 +392,6 @@ h::
     Send %A_ThisHotkey%
   Return
 
-^c::
-	If IsInEmacsMode()
-	{
-		If is_pre_x
-		kill_emacs()
-	}
-	Else
-		Send %A_ThisHotkey%
-	Return
 ^d::
 	If IsInEmacsMode()
 		delete_char()
@@ -485,7 +481,12 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
-
++^-::
+	If IsInEmacsMode()
+		undo()
+	Else
+		Send %A_ThisHotkey%
+	Return
 ;$^{Space}::
 ^vk20sc039::
 	If IsInEmacsMode()
