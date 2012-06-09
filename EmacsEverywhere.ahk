@@ -132,8 +132,8 @@ IsInEmacsMode() {
 iSChrome() {
   return WinActive("ahk_class Chrome_WidgetWin_0")
 }
-iSVC() {
-  return WinActive("Visual Studio")
+isVC11() {
+  return WinActive("Visual Studio", "", "VC", "")
 }
 
 ;==========================
@@ -162,7 +162,7 @@ delete_word() {
 delete_backward_word() {
   ; [Shift]+[backspace] to delete word (chars up to the first space to the left)
   ;$+BS::Send, {blind}^{Left}{BS} ; [ctrl]+[shift]+[left/right] = select chars up to space ('right' includes the space, 'left' doesn't)
-  Send +{BS}
+  Send ^{BS}
 	global is_pre_spc = 0
 	Return
 }
@@ -218,7 +218,7 @@ isearch_forward() {
 }
 
 isearch_backward() {
-	Send ^f
+	Send ^!f
 	global is_pre_spc = 0
 	Return
 }
@@ -230,7 +230,10 @@ kill_region() {
 }
 
 kill_ring_save() {
-	Send ^c
+	If isVC11()
+	  Send ^{Insert}
+	Else
+	  Send ^c
 	global is_pre_spc = 0
 	Return
 }
@@ -345,7 +348,12 @@ scroll_down() {
 		Send {PgDn}
 	Return
 }
-
+close_window() {
+	global is_pre_x = 0
+  Send ^!w
+  Return
+}
+    
 fallbackToDefault() {
   Send %A_ThisHotkey%
 }
@@ -366,11 +374,18 @@ fallbackToDefault() {
   Else
     fallbackToDefault()
   Return
-
 h::
   If (IsInEmacsMode() && is_pre_x) {
     send ^a
     is_pre_x = 0
+  }
+  Else
+    fallbackToDefault()
+  Return
+  
+k::
+  If (IsInEmacsMode() && is_pre_x) {
+    close_window()
   }
   Else
     fallbackToDefault()
@@ -434,12 +449,12 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
-^i::
-	If IsInEmacsMode()
-		indent_for_tab_command()
-	Else
-		Send %A_ThisHotkey%
-	Return
+;^i::
+;	If IsInEmacsMode()
+;		indent_for_tab_command()
+;	Else
+;		Send %A_ThisHotkey%
+;	Return
 ^s::
 	If IsInEmacsMode()
 	{
@@ -451,12 +466,12 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
-^r::
-	If IsInEmacsMode()
-		isearch_backward()
-	Else
-		Send %A_ThisHotkey%
-	Return
+;^r::
+;	If IsInEmacsMode()
+;		isearch_backward()
+;	Else
+;		Send %A_ThisHotkey%
+;	Return
 ^w::
 	If IsInEmacsMode() and !isChrome()
 		kill_region()
@@ -529,6 +544,13 @@ h::
 	Else
 		Send %A_ThisHotkey%
 	Return
+!h::
+	If IsInEmacsMode()
+		delete_backward_word()
+	Else
+		Send %A_ThisHotkey%
+	Return
+	
 ;!Backspace::
 ;	If IsInEmacsMode()
 ;		delete_backward_word()
