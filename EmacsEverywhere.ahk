@@ -120,20 +120,26 @@ is_target() {
 	}
 }
 
+iSChrome() {
+  return WinActive("ahk_class Chrome_WidgetWin_1")
+}
+isVC9() {
+  return WinActive("ahk_class wndclass_desked_gsk")
+}
+isMono() {
+  return WinActive("ahk_class gdkWindowToplevel")
+}
+isVC11() {
+  return WinActive("Visual Studio", "", "VC", "") && !isVC9()
+}
+
 IsInEmacsMode() {
 	global EmacsModeStat
-	if (EmacsModeStat  && is_target()) {
+	if (EmacsModeStat  && is_target() && !isVC9()) {
 		return true
 	} else {
 		return false
 	}
-}
-
-iSChrome() {
-  return WinActive("ahk_class Chrome_WidgetWin_0")
-}
-isVC11() {
-  return WinActive("Visual Studio", "", "VC", "")
 }
 
 ;==========================
@@ -277,12 +283,33 @@ move_beginning_of_line() {
 	Return
 }
 
+
 move_end_of_line() {
 	global
 	if is_pre_spc
 		Send +{END}
 	Else
 		Send {END}
+	Return
+}
+
+
+move_beginning_of_buffer() {
+	global
+	if is_pre_spc
+		Send +^{HOME}
+	Else
+		Send ^{HOME}
+	Return
+}
+
+
+move_end_of_buffer() {
+	global
+	if is_pre_spc
+		Send +^{END}
+	Else
+		Send ^{END}
 	Return
 }
 
@@ -353,6 +380,11 @@ close_window() {
   Send ^!w
   Return
 }
+close_program() {
+  global is_pre_x = 0
+  Send !{F4}
+  Return
+}
     
 fallbackToDefault() {
   Send %A_ThisHotkey%
@@ -386,6 +418,14 @@ h::
 k::
   If (IsInEmacsMode() && is_pre_x) {
     close_window()
+  }
+  Else
+    fallbackToDefault()
+  Return
+
+^c::
+  If (IsInEmacsMode() && is_pre_x) {
+    close_program()
   }
   Else
     fallbackToDefault()
@@ -527,13 +567,19 @@ k::
 	Return
 
 !f::
-	If IsInEmacsMode()
+	If IsInEmacsMode() || isMono()
 		forward_word()
 	Else
 		Send %A_ThisHotkey%
 	Return
 !b::
-	If IsInEmacsMode()
+	If IsInEmacsMode() || isMono()
+		backward_word()
+	Else
+		Send %A_ThisHotkey%
+	Return
+!,::
+	If IsInEmacsMode() || isMono()
 		backward_word()
 	Else
 		Send %A_ThisHotkey%
@@ -563,6 +609,12 @@ k::
 	Else
 		Send %A_ThisHotkey%
 	Return
+^,::
+	If IsInEmacsMode()
+		backward_char()
+	Else
+		Send %A_ThisHotkey%
+	Return
 ^v::
 	If IsInEmacsMode()
 		scroll_down()
@@ -570,7 +622,7 @@ k::
 		Send %A_ThisHotkey%
 	Return
 !v::
-	If IsInEmacsMode()
+	If IsInEmacsMode() or isMono()
 		scroll_up()
 	Else
 		Send %A_ThisHotkey%
@@ -592,17 +644,36 @@ k::
 	Else
 		Send %A_ThisHotkey%
 	Return
+![::
+  If IsInEmacsMode()
+    move_beginning_of_buffer()
+  Else
+    Send %A_ThisHotkey%
+  Return
+!]::
+  If IsInEmacsMode()
+    move_end_of_buffer()
+  Else
+    Send %A_ThisHotkey%
+  Return
+  
 #IfWinActive
 
 ^p::
-	If IsInEmacsMode()
+	If IsInEmacsMode() || isVC9()
 		previous_line()
 	Else
 		Send %A_ThisHotkey%
 	Return
 ^n::
-	If IsInEmacsMode()
+	If IsInEmacsMode() || isVC9()
 		next_line()
+	Else
+		Send %A_ThisHotkey%
+	Return
+!n::
+	If IsInEmacsMode() || isVC9()
+		previous_line()
 	Else
 		Send %A_ThisHotkey%
 	Return
