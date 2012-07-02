@@ -14,6 +14,7 @@
  GroupAdd, Enabled, Virtua Writer ;
  GroupAdd, Enabled, vwTestGui ;
  GroupAdd, Enabled, Visual Studio, , , VC, ;
+ GroupAdd, Enabled, Qt Creator ;
  GroupAdd, VC, Open ;
  GroupAdd, EMACS, ahk_class Emacs
 
@@ -268,6 +269,13 @@ save_buffer() {
 	Return
 }
 
+save_buffer_as() {
+	Send, ^w
+	global is_pre_x = 0
+	Return
+}
+
+
 kill_emacs() {
 	Send !{F4}
 	global is_pre_x = 0
@@ -514,13 +522,18 @@ k::
 ;	Return
 ^w::
 	If IsInEmacsMode() and !isChrome()
-		kill_region()
+	{
+    If is_pre_x
+      save_buffer_as()
+    Else
+      kill_region()
+  }
 	Else
 		Send %A_ThisHotkey%
 	Return
 !w::
 	If IsInEmacsMode()
-		kill_ring_save()
+    kill_ring_save()
 	Else
 		Send %A_ThisHotkey%
 	Return
