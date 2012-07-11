@@ -11,6 +11,7 @@
  GroupAdd, VC, VC10;
  GroupAdd, VC, Sublime Text ;
  GroupAdd, VC, ahk_class wndclass_desked_gsk; 
+ GroupAdd, Enabled, ahk_class gdkWindowToplevel;
  GroupAdd, Enabled, Virtua Writer ;
  GroupAdd, Enabled, vwTestGui ;
  GroupAdd, Enabled, Visual Studio, , , VC, ;
@@ -127,11 +128,14 @@ iSChrome() {
 isVC9() {
   return WinActive("ahk_class wndclass_desked_gsk")
 }
+isVC10() {
+  return WinActive("VC10")
+}
 isMono() {
   return WinActive("ahk_class gdkWindowToplevel")
 }
 isVC11() {
-  return WinActive("Visual Studio", "", "VC", "") && !isVC9()
+  return WinActive("Visual Studio", "", "VC", "") && !isVC9() && !isVC10()
 }
 
 IsInEmacsMode() {
@@ -486,10 +490,15 @@ k::
 		Send %A_ThisHotkey%
 	Return
 ^j::
-	If IsInEmacsMode()
-		newline_and_indent()
-	Else
-		Send %A_ThisHotkey%
+  If !isMono()
+    newline()
+  Else
+  {
+    If IsInEmacsMode()
+      newline_and_indent()
+    Else
+      Send %A_ThisHotkey%
+  }
 	Return
 ^m::
 	If IsInEmacsMode()
